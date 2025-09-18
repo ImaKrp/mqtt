@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MQTT Chat</title>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"
+      type="text/javascript"
+    ></script>
+    <script src="./js/dom/index.js" defer></script>
+  </head>
+  <body>
+    <h1>MQTT Chat</h1>
+
+    <div>
+      <label>Seu nome:</label>
+      <input type="text" id="username" />
+      <button id="connectBtn">Conectar</button>
+    </div>
+
+    <div id="chatControls" style="display: none; margin-top: 20px">
+      <label>ID para abrir chat:</label>
+      <input type="text" id="targetId" />
+      <button id="chatBtn">Abrir chat</button>
+    </div>
+
+    <div id="log" style="margin-top: 20px; font-family: monospace"></div>
+  </body>
+</html>
