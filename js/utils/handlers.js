@@ -25,6 +25,14 @@ function messageHandler(message) {
 
     if (accept) {
       const chatTopic = `chat/${data.from}_${id}`;
+
+      chats.push({
+        members: [data.from, id],
+        chatTopic,
+      });
+
+      setChatLinks(chats);
+
       client.subscribe(chatTopic, { qos: 2 });
       log(`🟢 Chat iniciado com ${data.from} no tópico ${chatTopic}`);
     } else {
@@ -40,6 +48,14 @@ function messageHandler(message) {
 
     if (data.accepted) {
       const chatTopic = `chat/${id}_${data.from}`;
+
+      chats.push({
+        members: [data.from, id],
+        chatTopic,
+      });
+
+      setChatLinks(chats);
+
       client.subscribe(chatTopic, { qos: 2 });
       log(`🟢 Chat aceito! Tópico ${chatTopic}`);
     } else {

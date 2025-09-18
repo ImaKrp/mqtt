@@ -1,5 +1,6 @@
-let client = null;
-let id = null;
+let client = undefined;
+let id = undefined;
+let chats = [];
 
 function createClient(name) {
   id = name;
@@ -14,6 +15,9 @@ function createClient(name) {
   };
 
   client.onMessageArrived = messageHandler;
+
+  chats = getChatLinks(id);
+  setUserData(id);
 
   client.connect({
     onSuccess: () => {
@@ -41,8 +45,17 @@ function createClient(name) {
 }
 
 function createChat(targetId) {
+  const existingChat = chats.find((c) => c.members.includes(targetId));
+
+  if (existingChat) {
+    client.subscribe(existingChat.chatTopic, { qos: 2 });
+    log(`🟢 Chat aceito! Tópico ${existingChat.chatTopic}`);
+    return;
+  }
+
   if (pendingInvites[targetId]) {
     log(`📤 Convite já enviado para ${targetId}`);
+    return;
   }
 
   const invite = new Paho.MQTT.Message(
@@ -65,3 +78,17 @@ function createChat(targetId) {
     delete pendingInvites[targetId];
   }, 60000);
 }
+
+window.addEventListener("load", () => {
+  id = getUserData();
+
+  if (!id) {
+    localStorage.clear();
+    return;
+  }
+
+  nameInput.value = id;
+  createClient(id);
+});
+
+setInterval(() => console.log(chats), 10000);

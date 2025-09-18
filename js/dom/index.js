@@ -1,5 +1,7 @@
+const nameInput = document.getElementById("username");
+
 document.getElementById("connectBtn").addEventListener("click", () => {
-  const name = document.getElementById("username").value.trim();
+  const name = nameInput.value.trim();
   if (name) createClient(name);
 });
 
