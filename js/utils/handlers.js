@@ -8,6 +8,11 @@ function messageHandler(message) {
   const data = JSON.parse(message.payloadString);
   console.log("📩 " + JSON.stringify(data));
 
+  if (data.type === "message") {
+    chatMessage(data);
+    return;
+  }
+
   if (data.type === "invite" && data.to === id) {
     const accept = confirm(`${data.from} quer abrir um chat. Aceitar?`);
 
@@ -34,6 +39,7 @@ function messageHandler(message) {
       setChatLinks(chats);
 
       client.subscribe(chatTopic, { qos: 2 });
+      active_chat = chatTopic;
       log(`🟢 Chat iniciado com ${data.from} no tópico ${chatTopic}`);
     } else {
       log(`❌ Convite recusado de ${data.from}`);
@@ -57,6 +63,7 @@ function messageHandler(message) {
       setChatLinks(chats);
 
       client.subscribe(chatTopic, { qos: 2 });
+      active_chat = chatTopic;
       log(`🟢 Chat aceito! Tópico ${chatTopic}`);
     } else {
       log(`❌ Convite recusado/expirado por ${data.from}`);

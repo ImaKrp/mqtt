@@ -1,6 +1,7 @@
 let client = undefined;
 let id = undefined;
 let chats = [];
+let active_chat = undefined;
 
 function createClient(name) {
   id = name;
@@ -41,6 +42,7 @@ function createClient(name) {
 
       document.getElementById("chatControls").style.display = "block";
     },
+    cleanSession: false,
   });
 }
 
@@ -48,6 +50,7 @@ function createChat(targetId) {
   const existingChat = chats.find((c) => c.members.includes(targetId));
 
   if (existingChat) {
+    active_chat = existingChat.chatTopic;
     client.subscribe(existingChat.chatTopic, { qos: 2 });
     log(`🟢 Chat aceito! Tópico ${existingChat.chatTopic}`);
     return;
