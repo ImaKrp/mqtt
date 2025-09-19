@@ -24,30 +24,37 @@
     <div>
       <form id="connect-form">
         <label>Seu nome:</label>
-        <input type="text" id="username" />
-        <button type="submit">Conectar</button>
+        <div>
+          <input type="text" id="username" />
+          <button type="submit">Conectar</button>
+        </div>
       </form>
     </div>
 
     <div id="chatControls" style="display: none; margin-top: 20px">
       <form id="chat-form">
         <label>ID para abrir chat:</label>
-        <input type="text" id="targetId" />
-        <button type="submit">Abrir chat</button>
+        <div>
+          <input type="text" id="targetId" />
+          <button type="submit">Abrir chat</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="chat-container">
+      <form id="message-form">
+        <div id="messages"></div>
+        <div>
+          <input
+            type="text"
+            id="messageInput"
+            placeholder="Digite sua mensagem"
+          />
+          <button type="submit">Enviar</button>
+        </div>
       </form>
     </div>
 
     <div id="log" style="margin-top: 20px; font-family: monospace"></div>
-    <div class="chat-container">
-      <form id="message-form">
-        <div id="messages"></div>
-        <input
-          type="text"
-          id="messageInput"
-          placeholder="Digite sua mensagem"
-        />
-        <button type="submit">Enviar</button>
-      </form>
-    </div>
   </body>
 </html>
