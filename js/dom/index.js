@@ -26,7 +26,6 @@ function sendMessage() {
     msg.qos = 2;
     msg.retained = true;
     client.send(msg);
-    
 
     document.getElementById(
       "messages"
@@ -36,6 +35,7 @@ function sendMessage() {
 }
 
 function receiveMessage(data) {
+  console.log(active_chat);
   document.getElementById(
     "messages"
   ).innerHTML += `<p><strong>${data.from}:</strong> ${data.message}</p>`;

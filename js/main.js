@@ -27,18 +27,18 @@ function createClient(name) {
       client.subscribe(userTopic, { qos: 2 });
       client.subscribe("usersStatus", { qos: 2 });
 
-      setInterval(() => {
-        const status = new Paho.MQTT.Message(
-          JSON.stringify({
-            type: "status",
-            from: id,
-            timestamp: new Date().getTime(),
-          })
-        );
-        status.destinationName = "usersStatus";
-        status.qos = 2;
-        client.send(status);
-      }, 10000);
+      // setInterval(() => {
+      //   const status = new Paho.MQTT.Message(
+      //     JSON.stringify({
+      //       type: "status",
+      //       from: id,
+      //       timestamp: new Date().getTime(),
+      //     })
+      //   );
+      //   status.destinationName = "usersStatus";
+      //   status.qos = 2;
+      //   client.send(status);
+      // }, 10000);
 
       document.getElementById("chatControls").style.display = "block";
     },
