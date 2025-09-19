@@ -1,17 +1,19 @@
 const nameInput = document.getElementById("username");
 
-document.getElementById("connectBtn").addEventListener("click", () => {
+document.getElementById("connect-form").addEventListener("submit", (e) => {
+  e.preventDefault();
   const name = nameInput.value.trim();
   if (name) createClient(name);
 });
 
-document.getElementById("chatBtn").addEventListener("click", () => {
+document.getElementById("chat-form").addEventListener("submit", (e) => {
+  e.preventDefault();
   const targetId = document.getElementById("targetId").value.trim();
   if (targetId) createChat(targetId);
 });
 
-function sendMessage() {
-  console.log(active_chat);
+document.getElementById("message-form").addEventListener("submit", (e) => {
+  e.preventDefault();
   const message = document.getElementById("messageInput").value;
   if (client && message && active_chat) {
     const msg = new Paho.MQTT.Message(
@@ -26,17 +28,12 @@ function sendMessage() {
     msg.qos = 2;
     msg.retained = true;
     client.send(msg);
-
-    document.getElementById(
-      "messages"
-    ).innerHTML += `<p><strong>Você:</strong> ${message}</p>`;
     document.getElementById("messageInput").value = "";
   }
-}
+});
 
 function receiveMessage(data) {
-  console.log(active_chat);
-  document.getElementById(
-    "messages"
-  ).innerHTML += `<p><strong>${data.from}:</strong> ${data.message}</p>`;
+  document.getElementById("messages").innerHTML += `<p><strong>${
+    data.from !== id ? data.from : "Você"
+  }:</strong> ${data.message}</p>`;
 }

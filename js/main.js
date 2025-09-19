@@ -1,6 +1,7 @@
 let client = undefined;
 let id = undefined;
 let chats = [];
+let history = {};
 let active_chat = undefined;
 
 function createClient(name) {
@@ -27,18 +28,18 @@ function createClient(name) {
       client.subscribe(userTopic, { qos: 2 });
       client.subscribe("usersStatus", { qos: 2 });
 
-      // setInterval(() => {
-      //   const status = new Paho.MQTT.Message(
-      //     JSON.stringify({
-      //       type: "status",
-      //       from: id,
-      //       timestamp: new Date().getTime(),
-      //     })
-      //   );
-      //   status.destinationName = "usersStatus";
-      //   status.qos = 2;
-      //   client.send(status);
-      // }, 10000);
+      setInterval(() => {
+        const status = new Paho.MQTT.Message(
+          JSON.stringify({
+            type: "status",
+            from: id,
+            timestamp: new Date().getTime(),
+          })
+        );
+        status.destinationName = "usersStatus";
+        status.qos = 2;
+        client.send(status);
+      }, 10000);
 
       document.getElementById("chatControls").style.display = "block";
     },
@@ -89,6 +90,8 @@ window.addEventListener("load", () => {
     localStorage.clear();
     return;
   }
+
+  history = getChatHistory();
 
   nameInput.value = id;
   createClient(id);

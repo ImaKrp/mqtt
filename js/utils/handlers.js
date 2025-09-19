@@ -5,11 +5,15 @@ function log(msg) {
 }
 
 function messageHandler(message) {
+  if (!message) return;
+
   const data = JSON.parse(message.payloadString);
   console.log("📩 " + JSON.stringify(data));
 
   if (data.type === "message") {
-    chatMessage(data);
+    const { destinationName } = message;
+
+    chatMessage(data, destinationName);
     return;
   }
 

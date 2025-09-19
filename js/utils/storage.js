@@ -12,6 +12,20 @@ const getChatLinks = (id) => {
   return [];
 };
 
+const setChatHistory = (data) => {
+  localStorage.setItem(`@history:${id}`, JSON.stringify(data));
+};
+
+const getChatHistory = (id) => {
+  const existingData = localStorage.getItem(`@history:${id}`);
+
+  if (existingData) {
+    return JSON.parse(existingData);
+  }
+
+  return {};
+};
+
 const getUserData = () => {
   const existingData = localStorage.getItem(`@user`);
 
