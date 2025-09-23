@@ -275,34 +275,11 @@ function handleNewChat(type) {
   }
 
   // Criar novo chat
-  const newChat = {
-    id: (state.chats.length + 1).toString(),
-    name: name,
-    type: type,
-    lastMessage:
-      type === "group" ? "Você foi adicionado ao grupo" : "Chat iniciado",
-    isOnline: type === "contact" ? Math.random() > 0.5 : undefined,
-    messages: [
-      {
-        id: Date.now().toString(),
-        sender: type === "group" ? "Sistema" : name,
-        content:
-          type === "group"
-            ? "Você foi adicionado ao grupo!"
-            : "Olá! Como você está?",
-        timestamp: new Date(),
-        isSent: false,
-      },
-    ],
-  };
-
-  state.chats.push(newChat);
-  state.activeChat = newChat.id;
+  if (type === "contact") createChat(name);
 
   nameInput.value = "";
   hideModal();
   // renderChats();
-  showChatArea(newChat);
 
   const actionText =
     type === "group"

@@ -10,6 +10,13 @@ function createClient(name) {
 
   client = new Paho.MQTT.Client("localhost", 9001, userTopic);
 
+  client.onConnectionLost = (res) => {
+    console.log(res);
+    if (res.errorCode !== 0) {
+      showToast("❌ Conexão perdida", res.errorMessage, "error");
+    }
+  };
+
   client.onMessageArrived = messageHandler;
 
   chats = getChatLinks(id);
@@ -17,6 +24,7 @@ function createClient(name) {
 
   client.connect({
     onSuccess: () => {
+      console.log("conectado");
       updateConnectionStatus();
       showToast("Conectado!", `Bem-vindo, ${id}!`, "success");
 
@@ -35,8 +43,6 @@ function createClient(name) {
         status.qos = 2;
         client.send(status);
       }, 10000);
-
-      document.getElementById("chatControls").style.display = "block";
     },
     cleanSession: false,
   });
