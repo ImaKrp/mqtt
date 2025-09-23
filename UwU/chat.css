@@ -22,29 +22,25 @@ body {
 
 /* Sidebar */
 .sidebar {
-  width: 220px;
+  width: 320px;
   background: #e2e8f0;
   border-right: 1px solid #cbd5e1;
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease;
+  overflow-y: auto;
+  position: relative;
+  padding-top: 68px;
 }
 
 .sidebar-header {
   padding: 1rem;
   border-bottom: 1px solid #cbd5e1;
+  position: fixed;
+  top: 0;
+  width: 320px;
   background: #e2e8f0;
-}
-
-.sidebar-column {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-
-  > div {
-    max-height: 50%;
-    overflow-y: auto;
-  }
+  z-index: 9999;
 }
 
 .app-title {
@@ -228,7 +224,7 @@ body {
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
   font-size: 0.875rem;
-  width: 140px;
+  width: 200px;
 }
 
 .user-input input:focus {
@@ -334,7 +330,6 @@ body {
     border-bottom: 1px solid #e2e8f0;
     background: #f8fafc;
     flex: 0;
-    padding: 12px 4px;
   }
 }
 
@@ -655,16 +650,6 @@ body {
 .toast.success {
   border-left: 4px solid #10b981;
 }
-
-.toast.error {
-  border-left: 4px solid #b91010;
-}
-
-.toast.warning {
-  border-left: 4px solid #b9ae10;
-}
-
-
 
 .toast-title {
   font-weight: 600;

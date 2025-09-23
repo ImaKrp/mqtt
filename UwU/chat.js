@@ -1,3 +1,88 @@
+// Estado da aplicação
+const state = {
+  currentUser: "",
+  isConnected: false,
+  activeChat: null,
+  chats: [
+    {
+      id: "1",
+      name: "João Silva",
+      type: "contact",
+      lastMessage: "Oi, como você está?",
+      isOnline: true,
+      messages: [
+        {
+          id: "1",
+          sender: "João Silva",
+          content: "Oi, como você está?",
+          timestamp: new Date(),
+          isSent: false,
+        },
+        {
+          id: "2",
+          sender: "Você",
+          content: "Oi! Estou bem, e você?",
+          timestamp: new Date(),
+          isSent: true,
+        },
+      ],
+    },
+    {
+      id: "2",
+      name: "Maria Santos",
+      type: "contact",
+      lastMessage: "Até mais tarde!",
+      isOnline: false,
+      messages: [
+        {
+          id: "3",
+          sender: "Maria Santos",
+          content: "Até mais tarde!",
+          timestamp: new Date(),
+          isSent: false,
+        },
+      ],
+    },
+    {
+      id: "3",
+      name: "Grupo Trabalho",
+      type: "group",
+      lastMessage: "Reunião às 15h",
+      messages: [
+        {
+          id: "4",
+          sender: "Pedro",
+          content: "Reunião às 15h",
+          timestamp: new Date(),
+          isSent: false,
+        },
+        {
+          id: "5",
+          sender: "Você",
+          content: "Ok, estarei lá!",
+          timestamp: new Date(),
+          isSent: true,
+        },
+      ],
+    },
+    {
+      id: "4",
+      name: "Grupo Amigos",
+      type: "group",
+      lastMessage: "Alguém para o cinema?",
+      messages: [
+        {
+          id: "6",
+          sender: "Ana",
+          content: "Alguém para o cinema?",
+          timestamp: new Date(),
+          isSent: false,
+        },
+      ],
+    },
+  ],
+};
+
 // Elementos DOM
 const elements = {
   username: document.getElementById("username"),
@@ -24,7 +109,7 @@ const elements = {
 
 // Inicialização
 document.addEventListener("DOMContentLoaded", function () {
-  // renderChats();
+  renderChats();
   setupEventListeners();
 });
 
@@ -85,19 +170,23 @@ function handleConnect() {
     return;
   }
 
-  createClient(username);
+  state.currentUser = username;
+  state.isConnected = true;
+  updateConnectionStatus();
+  showToast("Conectado!", `Bem-vindo, ${username}!`, "success");
 }
 
 function handleDisconnect() {
-  id = undefined;
-  active_chat = undefined;
+  state.currentUser = "";
+  state.isConnected = false;
+  state.activeChat = null;
   updateConnectionStatus();
   showWelcomeScreen();
-  showToast("❌ Conexão perdida", undefined, "error");
+  showToast("Desconectado", "Você foi desconectado com sucesso", "info");
 }
 
 function updateConnectionStatus() {
-  if (id) {
+  if (state.isConnected) {
     elements.statusIndicator.classList.add("online");
     elements.statusText.textContent = "Conectado";
     elements.connectBtn.style.display = "none";
@@ -115,28 +204,28 @@ function updateConnectionStatus() {
   }
 }
 
-// function renderChats() {
-//   const contacts = state.chats.filter((chat) => chat.type === "contact");
-//   const groups = state.chats.filter((chat) => chat.type === "group");
+function renderChats() {
+  const contacts = state.chats.filter((chat) => chat.type === "contact");
+  const groups = state.chats.filter((chat) => chat.type === "group");
 
-//   elements.contactsList.innerHTML = contacts
-//     .map((chat) => createChatItem(chat))
-//     .join("");
-//   elements.groupsList.innerHTML = groups
-//     .map((chat) => createChatItem(chat))
-//     .join("");
+  elements.contactsList.innerHTML = contacts
+    .map((chat) => createChatItem(chat))
+    .join("");
+  elements.groupsList.innerHTML = groups
+    .map((chat) => createChatItem(chat))
+    .join("");
 
-//   // Adicionar event listeners aos itens de chat
-//   document.querySelectorAll(".chat-item").forEach((item) => {
-//     item.addEventListener("click", () => {
-//       const chatId = item.dataset.chatId;
-//       selectChat(chatId);
-//     });
-//   });
-// }
+  // Adicionar event listeners aos itens de chat
+  document.querySelectorAll(".chat-item").forEach((item) => {
+    item.addEventListener("click", () => {
+      const chatId = item.dataset.chatId;
+      selectChat(chatId);
+    });
+  });
+}
 
 function createChatItem(chat) {
-  const isActive = active_chat === chat.topic;
+  const isActive = state.activeChat === chat.id;
   const onlineIndicator =
     chat.type === "contact" && chat.isOnline
       ? '<div class="online-indicator"></div>'
@@ -174,17 +263,17 @@ function createChatItem(chat) {
 }
 
 function selectChat(chatId) {
-  if (!id) {
+  if (!state.isConnected) {
     showToast("Erro", "Conecte-se primeiro para acessar os chats", "error");
     return;
   }
 
-  active_chat = chat;
+  state.activeChat = chatId;
   const chat = state.chats.find((c) => c.id === chatId);
 
   if (chat) {
     showChatArea(chat);
-    // renderChats();
+    renderChats(); // Re-render para atualizar o item ativo
   }
 }
 
@@ -243,9 +332,9 @@ function formatTime(date) {
 
 function handleSendMessage() {
   const messageText = elements.messageInput.value.trim();
-  if (!messageText || !active_chat || !id) return;
+  if (!messageText || !state.activeChat || !state.isConnected) return;
 
-  const chat = state.chats.find((c) => c.id === active_chat);
+  const chat = state.chats.find((c) => c.id === state.activeChat);
   if (!chat) return;
 
   const newMessage = {
@@ -261,7 +350,7 @@ function handleSendMessage() {
 
   elements.messageInput.value = "";
   renderMessages(chat.messages);
-  // renderChats();
+  renderChats();
 }
 
 function handleNewChat(type) {
@@ -301,7 +390,7 @@ function handleNewChat(type) {
 
   nameInput.value = "";
   hideModal();
-  // renderChats();
+  renderChats();
   showChatArea(newChat);
 
   const actionText =
@@ -342,11 +431,7 @@ function showToast(title, description, type = "info") {
 
   toast.innerHTML = `
         <div class="toast-title">${title}</div>
-        ${
-          description
-            ? `<div class="toast-description">${description}</div>`
-            : ""
-        }
+        <div class="toast-description">${description}</div>
     `;
 
   elements.toastContainer.appendChild(toast);
@@ -360,7 +445,7 @@ function showToast(title, description, type = "info") {
 // Atualizar status dos inputs de mensagem
 elements.messageInput.addEventListener("input", () => {
   const hasText = elements.messageInput.value.trim().length > 0;
-  const canSend = hasText && id && active_chat;
+  const canSend = hasText && state.isConnected && state.activeChat;
   elements.sendBtn.disabled = !canSend;
 });
 

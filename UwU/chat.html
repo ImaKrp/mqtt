@@ -1,23 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MQTT Chat</title>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"
-      type="text/javascript"
-    ></script>
-
-    <link rel="stylesheet" href="style.css" />
-    <script src="./js/main.js" defer></script>
-    <script src="./js/dom/index.js" defer></script>
-    <script src="./js/utils/handlers.js" defer></script>
-    <script src="./js/utils/storage.js" defer></script>
-    <script src="./js/topics/chat.js" defer></script>
-    <script src="./js/topics/controller.js" defer></script>
-    <script src="./js/topics/group.js" defer></script>
-
+    <title>Chat App</title>
+    <link rel="stylesheet" href="chat.css" />
     <script
       src="https://kit.fontawesome.com/7d89d2f34b.js"
       crossorigin="anonymous"
@@ -33,21 +20,21 @@
           </div>
         </div>
 
-        <div class="sidebar-column">
-          <div class="contacts-section">
-            <h3 class="section-title">
-              <span class="icon"><i class="fa-solid fa-user"></i></span>
-              Contatos
-            </h3>
-            <div id="contacts-list" class="chat-list"></div>
+        <div class="contacts-section">
+          <h3 class="section-title">
+            <span class="icon"><i class="fa-solid fa-user"></i></span>
+            Contatos
+          </h3>
+          <div id="contacts-list" class="chat-list">
           </div>
+        </div>
 
-          <div class="groups-section">
-            <h3 class="section-title">
-              <span class="icon"><i class="fa-solid fa-users"></i></span>
-              Grupos
-            </h3>
-            <div id="groups-list" class="chat-list"></div>
+        <div class="groups-section">
+          <h3 class="section-title">
+            <span class="icon"><i class="fa-solid fa-users"></i></span>
+            Grupos
+          </h3>
+          <div id="groups-list" class="chat-list">
           </div>
         </div>
       </div>
@@ -65,10 +52,10 @@
           </div>
 
           <div class="header-right">
-            <form class="user-input">
+            <div class="user-input">
               <label for="username">Seu nome:</label>
               <input type="text" id="username" placeholder="Digite seu nome" />
-            </form>
+            </div>
 
             <div class="action-buttons">
               <button id="connect-btn" class="btn btn-primary">
@@ -115,7 +102,8 @@
             </div>
 
             <div class="messages-area">
-              <div id="messages-container" class="messages-container"></div>
+              <div id="messages-container" class="messages-container">
+              </div>
             </div>
 
             <div class="message-input-area">
@@ -138,6 +126,7 @@
       </div>
     </div>
 
+    <!-- Modal para Novo Chat -->
     <div id="new-chat-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">

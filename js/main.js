@@ -10,12 +10,6 @@ function createClient(name) {
 
   client = new Paho.MQTT.Client("localhost", 9001, userTopic);
 
-  client.onConnectionLost = (res) => {
-    if (res.errorCode !== 0) {
-      log("❌ Conexão perdida: " + res.errorMessage);
-    }
-  };
-
   client.onMessageArrived = messageHandler;
 
   chats = getChatLinks(id);
@@ -23,7 +17,8 @@ function createClient(name) {
 
   client.connect({
     onSuccess: () => {
-      log("✅ Conectado como " + id);
+      updateConnectionStatus();
+      showToast("Conectado!", `Bem-vindo, ${id}!`, "success");
 
       client.subscribe(userTopic, { qos: 2 });
       client.subscribe("usersStatus", { qos: 2 });
@@ -53,12 +48,12 @@ function createChat(targetId) {
   if (existingChat) {
     active_chat = existingChat.chatTopic;
     client.subscribe(existingChat.chatTopic, { qos: 2 });
-    log(`🟢 Chat aceito! Tópico ${existingChat.chatTopic}`);
+    showToast("Chat", `🟢 Chat aceito! Com ${targetId}`, "success");
     return;
   }
 
   if (pendingInvites[targetId]) {
-    log(`📤 Convite já enviado para ${targetId}`);
+    showToast("Chat", `📤 Convite já enviado para ${targetId}`, "warning");
     return;
   }
 
@@ -74,10 +69,11 @@ function createChat(targetId) {
   invite.qos = 2;
   client.send(invite);
 
-  log(`📤 Convite enviado para ${targetId}`);
+  showToast("Chat", `📤 Convite enviado para ${targetId}`, "success");
 
   pendingInvites[targetId] = setTimeout(() => {
-    log(`⌛ Convite para ${targetId} expirou`);
+    showToast("Chat", `⌛ Convite para ${targetId} expirou`, "error");
+
     clearTimeout(pendingInvites[targetId]);
     delete pendingInvites[targetId];
   }, 60000);
@@ -93,7 +89,7 @@ window.addEventListener("load", () => {
 
   history = getChatHistory();
 
-  nameInput.value = id;
+  elements.username.value = id;
   createClient(id);
 });
 
