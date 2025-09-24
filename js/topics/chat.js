@@ -9,5 +9,8 @@ function chatMessage(data, topic) {
 
   setChatHistory(history);
 
-  receiveMessage(data);
+  console.log(history);
+
+  // receiveMessage(data);
+  renderMessages(history[active_chat]);
 }

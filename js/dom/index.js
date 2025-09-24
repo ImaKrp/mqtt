@@ -114,6 +114,7 @@ function setupModalListeners() {
     response.qos = 2;
     client.send(response);
 
+    renderChats();
     hideChatModal();
   });
   declineBtn.addEventListener("click", () => {
@@ -150,6 +151,12 @@ function hideChatModal() {
   elements.acceptChatModal.classList.remove("show");
   clearTimeout(chatModalTimeout);
 }
+
+elements.username.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    handleConnect();
+  }
+});
 
 // Funções principais
 function handleConnect() {
@@ -195,8 +202,6 @@ function updateConnectionStatus() {
 function renderChats() {
   const contacts = chats.filter((chat) => chat.type === "chat");
   const groups = chats.filter((chat) => chat.type === "group");
-
-  console.log(contacts, groups, chats);
 
   elements.contactsList.innerHTML = contacts
     .map((chat) => createChatItem(chat))
@@ -279,7 +284,7 @@ function showChatArea(chat) {
           .charAt(0)
           .toUpperCase();
 
-  // renderMessages(chat.messages);
+  if (history[active_chat]) renderMessages(history[active_chat]);
 }
 
 function showWelcomeScreen() {
@@ -288,6 +293,8 @@ function showWelcomeScreen() {
 }
 
 function renderMessages(messages) {
+  console.log(messages, history[active_chat]);
+  if (!messages) return;
   elements.messagesContainer.innerHTML = messages
     .map((message) => createMessageBubble(message))
     .join("");
@@ -297,17 +304,11 @@ function renderMessages(messages) {
 
 function createMessageBubble(message) {
   const time = formatTime(message.timestamp);
-  const messageClass = message.isSent ? "sent" : "received";
 
   return `
-        <div class="message ${messageClass}">
+        <div class="message ${message.from === id ? "sent" : "received"}">
             <div class="message-bubble">
-                ${
-                  !message.isSent
-                    ? `<div class="message-sender">${message.sender}</div>`
-                    : ""
-                }
-                <div class="message-text">${message.content}</div>
+                <div class="message-text">${message.message}</div>
                 <div class="message-time">${time}</div>
             </div>
         </div>
@@ -329,18 +330,19 @@ function handleSendMessage() {
   if (!chat) return;
 
   const newMessage = {
-    id: Date.now().toString(),
-    sender: "Você",
-    content: messageText,
-    timestamp: new Date(),
-    isSent: true,
+    type: "message",
+    from: id,
+    timestamp: new Date().getTime(),
+    message: messageText,
   };
 
-  // chat.messages.push(newMessage);
-  // chat.lastMessage = messageText;
+  const msg = new Paho.MQTT.Message(JSON.stringify(newMessage));
+  msg.destinationName = active_chat;
+  msg.qos = 2;
+  msg.retained = true;
+  client.send(msg);
 
   elements.messageInput.value = "";
-  // renderMessages(chat.messages);
   renderChats();
 }
 

@@ -21,6 +21,9 @@ function createClient(name) {
   client.onMessageArrived = messageHandler;
 
   chats = getChatLinks(id);
+  history = getChatHistory();
+
+  console.log(history);
 
   renderChats();
   setUserData(id);
@@ -95,8 +98,6 @@ window.addEventListener("load", () => {
     localStorage.clear();
     return;
   }
-
-  history = getChatHistory();
 
   elements.username.value = id;
   createClient(id);

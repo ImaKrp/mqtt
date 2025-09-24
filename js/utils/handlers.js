@@ -4,6 +4,8 @@ function messageHandler(message) {
   const data = JSON.parse(message.payloadString);
   console.log("📩 " + JSON.stringify(data));
 
+  console.log(data);
+
   if (data.type === "message") {
     const { destinationName } = message;
 
@@ -21,20 +23,18 @@ function messageHandler(message) {
       delete pendingInvites[data.from];
     }
 
-    if (data.chatTopic) {
-      const chatTopic = `chat/${id}_${data.from}`;
-
+    if (data.topic) {
       chats.push({
         members: [data.from, id],
-        chatTopic,
+        chatTopic: data.topic,
         type: "chat",
       });
 
       setChatLinks(chats);
 
-      client.subscribe(chatTopic, { qos: 2 });
-      active_chat = chatTopic;
-      showToast(`🟢 Chat aceito! Tópico ${chatTopic}`);
+      client.subscribe(data.topic, { qos: 2 });
+      active_chat = data.topic;
+      showToast(`🟢 Chat aceito! Tópico ${data.topic}`);
       renderChats();
     } else {
       showToast(`❌ Convite recusado/expirado por ${data.from}`);
