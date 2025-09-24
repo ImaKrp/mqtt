@@ -91,6 +91,7 @@ function handleConnect() {
 function handleDisconnect() {
   id = undefined;
   active_chat = undefined;
+  client.disconnect();
   updateConnectionStatus();
   showWelcomeScreen();
   showToast("❌ Conexão perdida", undefined, "error");

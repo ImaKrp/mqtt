@@ -1,8 +1,4 @@
-function log(msg) {
-  const el = document.getElementById("log");
-  el.innerHTML += msg + "<br/>";
-  el.scrollTop = el.scrollHeight;
-}
+
 
 function messageHandler(message) {
   if (!message) return;
@@ -44,9 +40,9 @@ function messageHandler(message) {
 
       client.subscribe(chatTopic, { qos: 2 });
       active_chat = chatTopic;
-      log(`🟢 Chat iniciado com ${data.from} no tópico ${chatTopic}`);
+      showToast(`🟢 Chat iniciado com ${data.from} no tópico ${chatTopic}`);
     } else {
-      log(`❌ Convite recusado de ${data.from}`);
+      showToast(`❌ Convite recusado de ${data.from}`);
     }
   }
 
@@ -68,9 +64,9 @@ function messageHandler(message) {
 
       client.subscribe(chatTopic, { qos: 2 });
       active_chat = chatTopic;
-      log(`🟢 Chat aceito! Tópico ${chatTopic}`);
+      showToast(`🟢 Chat aceito! Tópico ${chatTopic}`);
     } else {
-      log(`❌ Convite recusado/expirado por ${data.from}`);
+      showToast(`❌ Convite recusado/expirado por ${data.from}`);
     }
   }
 }

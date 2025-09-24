@@ -24,7 +24,6 @@ function createClient(name) {
 
   client.connect({
     onSuccess: () => {
-      console.log("conectado");
       updateConnectionStatus();
       showToast("Conectado!", `Bem-vindo, ${id}!`, "success");
 
