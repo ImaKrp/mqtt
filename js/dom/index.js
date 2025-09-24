@@ -17,6 +17,7 @@ const elements = {
   messageInput: document.getElementById("message-input"),
   sendBtn: document.getElementById("send-btn"),
   newChatModal: document.getElementById("new-chat-modal"),
+  acceptChatModal: document.getElementById("accept-chat-modal"),
   contactName: document.getElementById("contact-name"),
   groupName: document.getElementById("group-name"),
   toastContainer: document.getElementById("toast-container"),
@@ -75,6 +76,79 @@ function setupModalListeners() {
   elements.groupName.addEventListener("keypress", (e) => {
     if (e.key === "Enter") handleNewChat("group");
   });
+
+  const modal2 = elements.acceptChatModal;
+
+  const closeBtn2 = modal2.querySelector(".close-btn");
+  closeBtn2.addEventListener("click", hideChatModal);
+  const acceptBtn = modal2.querySelector("#acceptChatBtn");
+  const declineBtn = modal2.querySelector("#declineChatBtn");
+
+  acceptBtn.addEventListener("click", () => {
+    const chatTopic = `chat/${chatReq}_${id}`;
+
+    chats.push({
+      members: [chatReq, id],
+      chatTopic,
+    });
+
+    setChatLinks(chats);
+
+    client.subscribe(chatTopic, { qos: 2 });
+    active_chat = chatTopic;
+    showToast(
+      `🟢 Chat iniciado com ${chatReq} no tópico ${chatTopic}`,
+      undefined,
+      "success"
+    );
+
+    const response = new Paho.MQTT.Message(
+      JSON.stringify({
+        type: "inviteResponse",
+        from: id,
+        to: chatReq,
+        topic: chatTopic,
+      })
+    );
+    response.destinationName = "clientId_" + chatReq;
+    response.qos = 2;
+    client.send(response);
+
+    hideChatModal();
+  });
+  declineBtn.addEventListener("click", () => {
+    showToast(`❌ Convite recusado de ${chatReq}`, undefined, "error");
+
+    const response = new Paho.MQTT.Message(
+      JSON.stringify({
+        type: "inviteResponse",
+        from: id,
+        to: chatReq,
+        topic: undefined,
+      })
+    );
+    response.destinationName = "clientId_" + chatReq;
+    response.qos = 2;
+    client.send(response);
+
+    hideChatModal();
+  });
+}
+
+let chatModalTimeout = undefined;
+
+function showChatModal(req) {
+  elements.acceptChatModal.classList.add("show");
+  chatReq = req;
+  elements.acceptChatModal.querySelector("strong").textContent = req;
+
+  chatModalTimeout = setTimeout(() => hideChatModal(), 60000);
+}
+
+function hideChatModal() {
+  chatReq = undefined;
+  elements.acceptChatModal.classList.remove("show");
+  clearTimeout(chatModalTimeout);
 }
 
 // Funções principais

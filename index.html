@@ -137,12 +137,33 @@
         </div>
       </div>
     </div>
-
+    <div id="accept-chat-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2><i class="fa-solid fa-comment"></i> Solicitação de chat</h2>
+          <button class="close-btn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <p>
+            O usuário <strong>[Nome do Usuário]</strong> gostaria de iniciar um
+            chat com você.
+          </p>
+          <div class="modal-actions">
+            <button id="declineChatBtn" class="btn btn-secondary">
+              <i class="fa-solid fa-xmark"></i> Recusar
+            </button>
+            <button id="acceptChatBtn" class="btn btn-primary">
+              <i class="fa-solid fa-check"></i> Aceitar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div id="new-chat-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
           <h2><i class="fa-solid fa-comment"></i> Novo Chat</h2>
-          <button class="close-btn">&times;</button>
+          <button class="close-btn"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div class="modal-body">

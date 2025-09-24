@@ -1,5 +1,3 @@
-
-
 function messageHandler(message) {
   if (!message) return;
 
@@ -14,36 +12,7 @@ function messageHandler(message) {
   }
 
   if (data.type === "invite" && data.to === id) {
-    const accept = confirm(`${data.from} quer abrir um chat. Aceitar?`);
-
-    const response = new Paho.MQTT.Message(
-      JSON.stringify({
-        type: "inviteResponse",
-        from: id,
-        to: data.from,
-        accepted: accept,
-      })
-    );
-    response.destinationName = "clientId_" + data.from;
-    response.qos = 2;
-    client.send(response);
-
-    if (accept) {
-      const chatTopic = `chat/${data.from}_${id}`;
-
-      chats.push({
-        members: [data.from, id],
-        chatTopic,
-      });
-
-      setChatLinks(chats);
-
-      client.subscribe(chatTopic, { qos: 2 });
-      active_chat = chatTopic;
-      showToast(`🟢 Chat iniciado com ${data.from} no tópico ${chatTopic}`);
-    } else {
-      showToast(`❌ Convite recusado de ${data.from}`);
-    }
+    showChatModal(data.from);
   }
 
   if (data.type === "inviteResponse" && data.to === id) {
@@ -52,7 +21,7 @@ function messageHandler(message) {
       delete pendingInvites[data.from];
     }
 
-    if (data.accepted) {
+    if (data.topic) {
       const chatTopic = `chat/${id}_${data.from}`;
 
       chats.push({

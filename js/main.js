@@ -3,6 +3,7 @@ let id = undefined;
 let chats = [];
 let history = {};
 let active_chat = undefined;
+let chatReq = undefined;
 
 function createClient(name) {
   id = name;

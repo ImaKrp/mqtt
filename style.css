@@ -664,8 +664,6 @@ body {
   border-left: 4px solid #b9ae10;
 }
 
-
-
 .toast-title {
   font-weight: 600;
   color: #374151;
@@ -685,5 +683,20 @@ body {
   to {
     transform: translateX(0);
     opacity: 1;
+  }
+}
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  > button {
+    flex: 1;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
