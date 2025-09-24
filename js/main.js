@@ -21,6 +21,8 @@ function createClient(name) {
   client.onMessageArrived = messageHandler;
 
   chats = getChatLinks(id);
+
+  renderChats();
   setUserData(id);
 
   client.connect({
@@ -55,6 +57,7 @@ function createChat(targetId) {
     active_chat = existingChat.chatTopic;
     client.subscribe(existingChat.chatTopic, { qos: 2 });
     showToast("Chat", `🟢 Chat aceito! Com ${targetId}`, "success");
+    renderChats();
     return;
   }
 
@@ -98,5 +101,3 @@ window.addEventListener("load", () => {
   elements.username.value = id;
   createClient(id);
 });
-
-setInterval(() => console.log(chats), 10000);

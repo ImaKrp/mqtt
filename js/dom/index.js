@@ -25,7 +25,6 @@ const elements = {
 
 // Inicialização
 document.addEventListener("DOMContentLoaded", function () {
-  // renderChats();
   setupEventListeners();
 });
 
@@ -90,6 +89,7 @@ function setupModalListeners() {
     chats.push({
       members: [chatReq, id],
       chatTopic,
+      type: "chat",
     });
 
     setChatLinks(chats);
@@ -165,6 +165,8 @@ function handleConnect() {
 function handleDisconnect() {
   id = undefined;
   active_chat = undefined;
+  chats = [];
+  renderChats();
   client.disconnect();
   updateConnectionStatus();
   showWelcomeScreen();
@@ -190,56 +192,57 @@ function updateConnectionStatus() {
   }
 }
 
-// function renderChats() {
-//   const contacts = state.chats.filter((chat) => chat.type === "contact");
-//   const groups = state.chats.filter((chat) => chat.type === "group");
+function renderChats() {
+  const contacts = chats.filter((chat) => chat.type === "chat");
+  const groups = chats.filter((chat) => chat.type === "group");
 
-//   elements.contactsList.innerHTML = contacts
-//     .map((chat) => createChatItem(chat))
-//     .join("");
-//   elements.groupsList.innerHTML = groups
-//     .map((chat) => createChatItem(chat))
-//     .join("");
+  console.log(contacts, groups, chats);
 
-//   // Adicionar event listeners aos itens de chat
-//   document.querySelectorAll(".chat-item").forEach((item) => {
-//     item.addEventListener("click", () => {
-//       const chatId = item.dataset.chatId;
-//       selectChat(chatId);
-//     });
-//   });
-// }
+  elements.contactsList.innerHTML = contacts
+    .map((chat) => createChatItem(chat))
+    .join("");
+  elements.groupsList.innerHTML = groups
+    .map((chat) => createChatItem(chat))
+    .join("");
+
+  // Adicionar event listeners aos itens de chat
+  document.querySelectorAll(".chat-item").forEach((item) => {
+    item.addEventListener("click", () => {
+      const chatId = item.dataset.chatId;
+      selectChat(chatId);
+    });
+  });
+}
 
 function createChatItem(chat) {
-  const isActive = active_chat === chat.topic;
+  const isActive = active_chat === chat.chatTopic;
   const onlineIndicator =
-    chat.type === "contact" && chat.isOnline
-      ? '<div class="online-indicator"></div>'
-      : "";
+    chat.type === "chat" ? '<div class="online-indicator"></div>' : "";
 
   return `
         <div class="chat-item ${isActive ? "active" : ""}" data-chat-id="${
-    chat.id
+    chat.chatTopic
   }">
             <div class="chat-avatar ${chat.type === "group" ? "group" : ""}">
                 ${
                   chat.type === "group"
                     ? '<i class="fa-solid fa-users"></i>'
-                    : chat.name.charAt(0).toUpperCase()
+                    : chat.members
+                        .filter((i) => i !== id)[0]
+                        .charAt(0)
+                        .toUpperCase()
                 }
                 ${onlineIndicator}
             </div>
             <div class="chat-info">
-                <h4>${chat.name}</h4>
+                <h4>${chat.members.filter((i) => i !== id)[0]}</h4>
                 <p>${chat.lastMessage || ""}</p>
             </div>
             ${
-              chat.type === "contact"
+              chat.type === "chat"
                 ? `
-                <div class="status-badge ${
-                  chat.isOnline ? "online" : "offline"
-                }">
-                    ${chat.isOnline ? "Online" : "Offline"}
+                <div class="status-badge ${true ? "online" : "offline"}">
+                    ${true ? "Online" : "Offline"}
                 </div>
             `
                 : ""
@@ -253,13 +256,12 @@ function selectChat(chatId) {
     showToast("Erro", "Conecte-se primeiro para acessar os chats", "error");
     return;
   }
-
-  active_chat = chat;
-  const chat = state.chats.find((c) => c.id === chatId);
+  active_chat = chatId;
+  const chat = chats.find((c) => c.chatTopic === chatId);
 
   if (chat) {
     showChatArea(chat);
-    // renderChats();
+    renderChats();
   }
 }
 
@@ -267,14 +269,17 @@ function showChatArea(chat) {
   elements.welcomeScreen.style.display = "none";
   elements.activeChat.style.display = "flex";
 
-  elements.chatName.textContent = chat.name;
+  elements.chatName.textContent = chat.members.filter((i) => i !== id)[0];
   elements.chatType.textContent = chat.type === "group" ? "Grupo" : "Contato";
   elements.chatAvatarText.textContent =
     chat.type === "group"
       ? '<i class="fa-solid fa-users"></i>'
-      : chat.name.charAt(0).toUpperCase();
+      : chat.members
+          .filter((i) => i !== id)[0]
+          .charAt(0)
+          .toUpperCase();
 
-  renderMessages(chat.messages);
+  // renderMessages(chat.messages);
 }
 
 function showWelcomeScreen() {
@@ -320,7 +325,7 @@ function handleSendMessage() {
   const messageText = elements.messageInput.value.trim();
   if (!messageText || !active_chat || !id) return;
 
-  const chat = state.chats.find((c) => c.id === active_chat);
+  const chat = chats.find((c) => c.chatTopic === active_chat);
   if (!chat) return;
 
   const newMessage = {
@@ -331,12 +336,12 @@ function handleSendMessage() {
     isSent: true,
   };
 
-  chat.messages.push(newMessage);
-  chat.lastMessage = messageText;
+  // chat.messages.push(newMessage);
+  // chat.lastMessage = messageText;
 
   elements.messageInput.value = "";
-  renderMessages(chat.messages);
-  // renderChats();
+  // renderMessages(chat.messages);
+  renderChats();
 }
 
 function handleNewChat(type) {
@@ -354,7 +359,7 @@ function handleNewChat(type) {
 
   nameInput.value = "";
   hideModal();
-  // renderChats();
+  renderChats();
 
   const actionText =
     type === "group"

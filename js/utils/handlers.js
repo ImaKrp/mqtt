@@ -21,12 +21,13 @@ function messageHandler(message) {
       delete pendingInvites[data.from];
     }
 
-    if (data.topic) {
+    if (data.chatTopic) {
       const chatTopic = `chat/${id}_${data.from}`;
 
       chats.push({
         members: [data.from, id],
         chatTopic,
+        type: "chat",
       });
 
       setChatLinks(chats);
@@ -34,6 +35,7 @@ function messageHandler(message) {
       client.subscribe(chatTopic, { qos: 2 });
       active_chat = chatTopic;
       showToast(`🟢 Chat aceito! Tópico ${chatTopic}`);
+      renderChats();
     } else {
       showToast(`❌ Convite recusado/expirado por ${data.from}`);
     }
