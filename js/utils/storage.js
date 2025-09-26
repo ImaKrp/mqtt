@@ -5,7 +5,9 @@ const setChatLinks = (data) => {
 const getChatLinks = (id) => {
   const existingData = localStorage.getItem(`@links:${id}`);
   if (existingData) {
-    return JSON.parse(existingData);
+    const parsed = JSON.parse(existingData);
+    parsed.forEach((i) => delete i.status);
+    return parsed;
   }
 
   return [];

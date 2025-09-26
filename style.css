@@ -9,7 +9,9 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
     sans-serif;
   background: linear-gradient(180deg, #f8fafc, #f1f5f9);
-  height: 100vh;
+  min-height: 100vh;
+  height: 100%;
+  width: 100vw;
   overflow: hidden;
 }
 
@@ -18,16 +20,22 @@ body {
   display: flex;
   height: 100vh;
   width: 100%;
+  overflow: auto;
 }
 
 /* Sidebar */
 .sidebar {
-  width: 220px;
+  min-width: 320px;
+  max-width: 33vw;
   background: #e2e8f0;
   border-right: 1px solid #cbd5e1;
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease;
+
+  .close-btn {
+    display: none;
+  }
 }
 
 .sidebar-header {
@@ -229,6 +237,12 @@ body {
   border-radius: 0.375rem;
   font-size: 0.875rem;
   width: 140px;
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+.user-input input:disabled {
+  opacity: 0.7;
 }
 
 .user-input input:focus {
@@ -299,6 +313,7 @@ body {
   display: flex;
   flex-direction: column;
   background: white;
+  overflow-y: auto;
 }
 
 .welcome-screen {
@@ -325,17 +340,17 @@ body {
   color: #374151;
 }
 
+.main-content .chat-info {
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  flex: 0;
+  padding: 12px 14px;
+}
+
 .active-chat {
   flex: 1;
   display: flex;
   flex-direction: column;
-
-  > .chat-info {
-    border-bottom: 1px solid #e2e8f0;
-    background: #f8fafc;
-    flex: 0;
-    padding: 12px 4px;
-  }
 }
 
 .chat-info {
@@ -365,8 +380,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  flex-grow: 1;
 }
-
 .message {
   display: flex;
 }
@@ -698,5 +713,39 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+}
+
+#open-sidebar {
+  color: black;
+  font-size: 16px;
+  background: none;
+  border: none;
+  display: none;
+}
+
+@media (max-width: 980px) {
+  #open-sidebar {
+    display: block;
+  }
+  .sidebar {
+    display: flex;
+    position: absolute;
+    z-index: 2;
+    left: -320px;
+    height: 100%;
+    transition: left 0.6s ease-in-out;
+  }
+  .sidebar.open {
+    height: 100%;
+    box-shadow: 0px 0px 8px -1px rgba(0, 0, 0, 0.203);
+    left: 0px;
+    .close-btn {
+      display: block;
+      position: absolute;
+      right: 16px;
+      color: black;
+      font-size: 16px;
+    }
   }
 }

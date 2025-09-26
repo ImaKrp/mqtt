@@ -29,7 +29,9 @@
         <div class="sidebar-header">
           <div class="app-title">
             <span class="icon"><i class="fa-solid fa-comment"></i></span>
-            <h1>Chat App</h1>
+            <h1>MQTT App</h1>
+
+            <button class="close-btn"><i class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
 
@@ -55,6 +57,7 @@
       <div class="main-content">
         <header class="chat-header">
           <div class="header-left">
+            <button id="open-sidebar"><i class="fa-solid fa-bars"></i></button>
             <div class="connection-status">
               <span
                 id="status-indicator"
@@ -92,6 +95,16 @@
           </div>
         </header>
 
+        <div class="chat-info" style="display: none">
+          <div class="chat-avatar">
+            <span id="chat-avatar-text">A</span>
+          </div>
+          <div class="chat-details">
+            <h3 id="chat-name">Nome do Chat</h3>
+            <p id="chat-type">Contato</p>
+          </div>
+        </div>
+
         <div class="chat-area">
           <div id="welcome-screen" class="welcome-screen">
             <div class="welcome-content">
@@ -104,32 +117,22 @@
           </div>
 
           <div id="active-chat" class="active-chat" style="display: none">
-            <div class="chat-info">
-              <div class="chat-avatar">
-                <span id="chat-avatar-text">A</span>
-              </div>
-              <div class="chat-details">
-                <h3 id="chat-name">Nome do Chat</h3>
-                <p id="chat-type">Contato</p>
-              </div>
-            </div>
-
             <div class="messages-area">
               <div id="messages-container" class="messages-container"></div>
             </div>
+          </div>
+        </div>
 
-            <div class="message-input-area">
-              <div class="input-container">
-                <input
-                  type="text"
-                  id="message-input"
-                  placeholder="Digite sua mensagem..."
-                />
-                <button id="send-btn" class="send-btn">
-                  <i class="fa-solid fa-paper-plane"></i>
-                </button>
-              </div>
-            </div>
+        <div class="message-input-area" style="display: none">
+          <div class="input-container">
+            <input
+              type="text"
+              id="message-input"
+              placeholder="Digite sua mensagem..."
+            />
+            <button id="send-btn" class="send-btn">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
           </div>
         </div>
       </div>

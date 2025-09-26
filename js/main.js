@@ -9,10 +9,12 @@ function createClient(name) {
   id = name;
   const userTopic = "clientId_" + name;
 
+  let statusInterval = undefined;
+
   client = new Paho.MQTT.Client("localhost", 9001, userTopic);
 
   client.onConnectionLost = (res) => {
-    console.log(res);
+    if (statusInterval) clearInterval(statusInterval);
     if (res.errorCode !== 0) {
       showToast("❌ Conexão perdida", res.errorMessage, "error");
     }
@@ -21,10 +23,7 @@ function createClient(name) {
   client.onMessageArrived = messageHandler;
 
   chats = getChatLinks(id);
-  history = getChatHistory();
-
-  console.log(history);
-
+  history = getChatHistory(id);
   renderChats();
   setUserData(id);
 
@@ -36,7 +35,7 @@ function createClient(name) {
       client.subscribe(userTopic, { qos: 2 });
       client.subscribe("usersStatus", { qos: 2 });
 
-      setInterval(() => {
+      statusInterval = setInterval(() => {
         const status = new Paho.MQTT.Message(
           JSON.stringify({
             type: "status",
@@ -47,7 +46,7 @@ function createClient(name) {
         status.destinationName = "usersStatus";
         status.qos = 2;
         client.send(status);
-      }, 10000);
+      }, 5000);
     },
     cleanSession: false,
   });
@@ -57,9 +56,8 @@ function createChat(targetId) {
   const existingChat = chats.find((c) => c.members.includes(targetId));
 
   if (existingChat) {
-    active_chat = existingChat.chatTopic;
     client.subscribe(existingChat.chatTopic, { qos: 2 });
-    showToast("Chat", `🟢 Chat aceito! Com ${targetId}`, "success");
+    showToast(`🟢 Chat aceito!`, `Tópico ${data.topic}`, "success");
     renderChats();
     return;
   }
@@ -100,5 +98,5 @@ window.addEventListener("load", () => {
   }
 
   elements.username.value = id;
-  createClient(id);
+  handleConnect();
 });

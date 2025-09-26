@@ -2,9 +2,10 @@ function messageHandler(message) {
   if (!message) return;
 
   const data = JSON.parse(message.payloadString);
-  console.log("📩 " + JSON.stringify(data));
 
-  console.log(data);
+  if (data.type === "status") {
+    onlineStatus(data);
+  }
 
   if (data.type === "message") {
     const { destinationName } = message;
@@ -33,8 +34,7 @@ function messageHandler(message) {
       setChatLinks(chats);
 
       client.subscribe(data.topic, { qos: 2 });
-      active_chat = data.topic;
-      showToast(`🟢 Chat aceito! Tópico ${data.topic}`);
+      showToast(`🟢 Chat aceito!`, `Tópico ${data.topic}`, "success");
       renderChats();
     } else {
       showToast(`❌ Convite recusado/expirado por ${data.from}`);

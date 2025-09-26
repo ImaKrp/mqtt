@@ -84,7 +84,7 @@ function setupModalListeners() {
   const declineBtn = modal2.querySelector("#declineChatBtn");
 
   acceptBtn.addEventListener("click", () => {
-    const chatTopic = `chat/${chatReq}_${id}`;
+    const chatTopic = `chat/${chatReq}_${id}_${new Date().getTime()}`;
 
     chats.push({
       members: [chatReq, id],
@@ -95,7 +95,6 @@ function setupModalListeners() {
     setChatLinks(chats);
 
     client.subscribe(chatTopic, { qos: 2 });
-    active_chat = chatTopic;
     showToast(
       `🟢 Chat iniciado com ${chatReq} no tópico ${chatTopic}`,
       undefined,
@@ -161,12 +160,28 @@ elements.username.addEventListener("keypress", (e) => {
 // Funções principais
 function handleConnect() {
   const username = elements.username.value.trim();
+
+  elements.username.disabled = true;
+
+  document.querySelector(".user-input label").style.display = "none";
+
   if (!username) {
     showToast("Erro", "Digite seu nome para conectar", "error");
     return;
   }
 
   createClient(username);
+}
+
+document
+  .getElementById("open-sidebar")
+  .addEventListener("click", toggleSidebar);
+document
+  .querySelector(".sidebar .close-btn")
+  .addEventListener("click", toggleSidebar);
+
+function toggleSidebar() {
+  document.querySelector(".sidebar").classList.toggle("open");
 }
 
 function handleDisconnect() {
@@ -177,7 +192,10 @@ function handleDisconnect() {
   client.disconnect();
   updateConnectionStatus();
   showWelcomeScreen();
-  showToast("❌ Conexão perdida", undefined, "error");
+  elements.username.disabled = false;
+
+  document.querySelector(".user-input label").style.display = "inline";
+  showToast("❌ Desconectado", undefined, "error");
 }
 
 function updateConnectionStatus() {
@@ -224,6 +242,18 @@ function createChatItem(chat) {
   const onlineIndicator =
     chat.type === "chat" ? '<div class="online-indicator"></div>' : "";
 
+  const user = chat.members.filter((i) => i !== id)[0];
+  const updates = chat?.status?.[user];
+  let isOnline = false;
+
+  if (updates && new Date().getTime() - updates?.last_update < 6000) {
+    isOnline = true;
+  }
+
+  if (chat.chatTopic === active_chat) {
+    elements.chatType.textContent = isOnline ? "Online" : "Offline";
+  }
+
   return `
         <div class="chat-item ${isActive ? "active" : ""}" data-chat-id="${
     chat.chatTopic
@@ -232,22 +262,19 @@ function createChatItem(chat) {
                 ${
                   chat.type === "group"
                     ? '<i class="fa-solid fa-users"></i>'
-                    : chat.members
-                        .filter((i) => i !== id)[0]
-                        .charAt(0)
-                        .toUpperCase()
+                    : user.charAt(0).toUpperCase()
                 }
                 ${onlineIndicator}
             </div>
             <div class="chat-info">
-                <h4>${chat.members.filter((i) => i !== id)[0]}</h4>
+                <h4>${user}</h4>
                 <p>${chat.lastMessage || ""}</p>
             </div>
             ${
               chat.type === "chat"
                 ? `
-                <div class="status-badge ${true ? "online" : "offline"}">
-                    ${true ? "Online" : "Offline"}
+                <div class="status-badge ${isOnline ? "online" : "offline"}">
+                    ${isOnline ? "Online" : "Offline"}
                 </div>
             `
                 : ""
@@ -273,9 +300,12 @@ function selectChat(chatId) {
 function showChatArea(chat) {
   elements.welcomeScreen.style.display = "none";
   elements.activeChat.style.display = "flex";
+  document.querySelector(".main-content .chat-info").style.display = "flex";
+  document.querySelector(".main-content .message-input-area").style.display =
+    "block";
 
   elements.chatName.textContent = chat.members.filter((i) => i !== id)[0];
-  elements.chatType.textContent = chat.type === "group" ? "Grupo" : "Contato";
+  elements.chatType.textContent = chat.type === "group" ? "Grupo" : "Offline";
   elements.chatAvatarText.textContent =
     chat.type === "group"
       ? '<i class="fa-solid fa-users"></i>'
@@ -290,16 +320,24 @@ function showChatArea(chat) {
 function showWelcomeScreen() {
   elements.welcomeScreen.style.display = "flex";
   elements.activeChat.style.display = "none";
+  document.querySelector(".main-content .chat-info").style.display = "none";
+  document.querySelector(".main-content .message-input-area").style.display =
+    "none";
 }
 
-function renderMessages(messages) {
-  console.log(messages, history[active_chat]);
+document
+  .querySelector(".sidebar-header")
+  .addEventListener("click", showWelcomeScreen);
+
+function renderMessages(htry) {
+  const messages = htry.msgs;
+
   if (!messages) return;
   elements.messagesContainer.innerHTML = messages
     .map((message) => createMessageBubble(message))
     .join("");
-  elements.messagesContainer.scrollTop =
-    elements.messagesContainer.scrollHeight;
+  document.querySelector(".chat-area").scrollTop =
+    document.querySelector(".chat-area").scrollHeight;
 }
 
 function createMessageBubble(message) {

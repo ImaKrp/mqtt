@@ -1,16 +1,17 @@
 function chatMessage(data, topic) {
   let dt = [];
   if (history?.[topic]) {
-    dt = [...history?.[topic]];
+    dt = [...history?.[topic]?.msgs];
   }
 
   dt.push(data);
-  history[topic] = dt;
+  history[topic] = {
+    msgs: dt,
+    last: data,
+  };
 
   setChatHistory(history);
 
-  console.log(history);
-
-  // receiveMessage(data);
-  renderMessages(history[active_chat]);
+  if (topic === active_chat) renderMessages(history[active_chat]);
 }
+
