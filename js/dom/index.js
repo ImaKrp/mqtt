@@ -1,4 +1,3 @@
-// Elementos DOM
 const elements = {
   username: document.getElementById("username"),
   connectBtn: document.getElementById("connect-btn"),
@@ -23,30 +22,23 @@ const elements = {
   toastContainer: document.getElementById("toast-container"),
 };
 
-// Inicialização
 document.addEventListener("DOMContentLoaded", function () {
   setupEventListeners();
 });
 
-// Event Listeners
 function setupEventListeners() {
-  // Conectar/Desconectar
   elements.connectBtn.addEventListener("click", handleConnect);
   elements.disconnectBtn.addEventListener("click", handleDisconnect);
 
-  // Novo Chat
   elements.newChatBtn.addEventListener("click", () => showModal());
 
-  // Enviar mensagem
   elements.sendBtn.addEventListener("click", handleSendMessage);
   elements.messageInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") handleSendMessage();
   });
 
-  // Modal
   setupModalListeners();
 
-  // Tab switching
   document.querySelectorAll(".tab-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => switchTab(e.target.dataset.tab));
   });
@@ -58,17 +50,14 @@ function setupModalListeners() {
   const addContactBtn = document.getElementById("add-contact-btn");
   const addGroupBtn = document.getElementById("add-group-btn");
 
-  // Fechar modal
   closeBtn.addEventListener("click", hideModal);
   modal.addEventListener("click", (e) => {
     if (e.target === modal) hideModal();
   });
 
-  // Adicionar contato/grupo
   addContactBtn.addEventListener("click", () => handleNewChat("contact"));
   addGroupBtn.addEventListener("click", () => handleNewChat("group"));
 
-  // Enter nos inputs
   elements.contactName.addEventListener("keypress", (e) => {
     if (e.key === "Enter") handleNewChat("contact");
   });
@@ -135,8 +124,6 @@ function setupModalListeners() {
   });
 }
 
-let chatModalTimeout = undefined;
-
 function showChatModal(req) {
   elements.acceptChatModal.classList.add("show");
   chatReq = req;
@@ -157,22 +144,6 @@ elements.username.addEventListener("keypress", (e) => {
   }
 });
 
-// Funções principais
-function handleConnect() {
-  const username = elements.username.value.trim();
-
-  elements.username.disabled = true;
-
-  document.querySelector(".user-input label").style.display = "none";
-
-  if (!username) {
-    showToast("Erro", "Digite seu nome para conectar", "error");
-    return;
-  }
-
-  createClient(username);
-}
-
 document
   .getElementById("open-sidebar")
   .addEventListener("click", toggleSidebar);
@@ -182,20 +153,6 @@ document
 
 function toggleSidebar() {
   document.querySelector(".sidebar").classList.toggle("open");
-}
-
-function handleDisconnect() {
-  id = undefined;
-  active_chat = undefined;
-  chats = [];
-  renderChats();
-  client.disconnect();
-  updateConnectionStatus();
-  showWelcomeScreen();
-  elements.username.disabled = false;
-
-  document.querySelector(".user-input label").style.display = "inline";
-  showToast("❌ Desconectado", undefined, "error");
 }
 
 function updateConnectionStatus() {
@@ -228,7 +185,6 @@ function renderChats() {
     .map((chat) => createChatItem(chat))
     .join("");
 
-  // Adicionar event listeners aos itens de chat
   document.querySelectorAll(".chat-item").forEach((item) => {
     item.addEventListener("click", () => {
       const chatId = item.dataset.chatId;
@@ -360,59 +316,7 @@ function formatTime(date) {
   });
 }
 
-function handleSendMessage() {
-  const messageText = elements.messageInput.value.trim();
-  if (!messageText || !active_chat || !id) return;
 
-  const chat = chats.find((c) => c.chatTopic === active_chat);
-  if (!chat) return;
-
-  const newMessage = {
-    type: "message",
-    from: id,
-    timestamp: new Date().getTime(),
-    message: messageText,
-  };
-
-  const msg = new Paho.MQTT.Message(JSON.stringify(newMessage));
-  msg.destinationName = active_chat;
-  msg.qos = 2;
-  msg.retained = true;
-  client.send(msg);
-
-  elements.messageInput.value = "";
-  renderChats();
-}
-
-function handleNewChat(type) {
-  const nameInput =
-    type === "contact" ? elements.contactName : elements.groupName;
-  const name = nameInput.value.trim();
-
-  if (!name) {
-    showToast("Erro", "Digite um nome válido", "error");
-    return;
-  }
-
-  // Criar novo chat
-  if (type === "contact") createChat(name);
-
-  nameInput.value = "";
-  hideModal();
-  renderChats();
-
-  const actionText =
-    type === "group"
-      ? "Solicitação para participar do grupo"
-      : "Solicitação de chat";
-  showToast(
-    "Solicitação enviada!",
-    `${actionText} "${name}" enviada`,
-    "success"
-  );
-}
-
-// Funções de UI
 function showModal() {
   elements.newChatModal.classList.add("show");
 }
@@ -422,12 +326,11 @@ function hideModal() {
 }
 
 function switchTab(tabName) {
-  // Atualizar botões das abas
+  if (!tabName) return;
   document.querySelectorAll(".tab-btn").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.tab === tabName);
   });
 
-  // Atualizar conteúdo das abas
   document.querySelectorAll(".tab-content").forEach((content) => {
     content.classList.toggle("active", content.id === `${tabName}-tab`);
   });
@@ -448,18 +351,15 @@ function showToast(title, description, type = "info") {
 
   elements.toastContainer.appendChild(toast);
 
-  // Remover após 3 segundos
   setTimeout(() => {
     toast.remove();
   }, 3000);
 }
 
-// Atualizar status dos inputs de mensagem
 elements.messageInput.addEventListener("input", () => {
   const hasText = elements.messageInput.value.trim().length > 0;
   const canSend = hasText && id && active_chat;
   elements.sendBtn.disabled = !canSend;
 });
 
-// Inicializar estado dos botões
 elements.sendBtn.disabled = true;
