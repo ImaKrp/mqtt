@@ -1,32 +1,15 @@
-let pendingInvites = {};
+let pending = {};
 let chatModalTimeout = undefined;
+let groupModalTimeout = undefined;
 
 function onlineStatus(data) {
-  chats
-    .filter((c) => c.members.includes(data.from))
-    .forEach((c) => {
-      if (!c?.status) {
-        c.status = {};
-
-        c.members.forEach((m) => {
-          c.status[m] = {
-            last_update: 0,
-          };
-        });
-      }
-
-      c.status[data.from] = {
-        last_update: data.timestamp,
-      };
-    });
+  users_status[data.from] = data.timestamp;
 
   setChatLinks(chats);
   renderChats();
 }
 
 function handleConnect() {
-  const username = elements.username.value.trim();
-
   elements.username.disabled = true;
 
   document.querySelector(".user-input label").style.display = "none";
@@ -35,8 +18,6 @@ function handleConnect() {
     showToast("Erro", "Digite seu nome para conectar", "error");
     return;
   }
-
-  createClient(username);
 }
 
 function handleDisconnect() {
@@ -44,7 +25,7 @@ function handleDisconnect() {
   active_chat = undefined;
   chats = [];
   renderChats();
-  client.disconnect();
+  if (client.isConnected()) client.disconnect();
   updateConnectionStatus();
   showWelcomeScreen();
   elements.username.disabled = false;
@@ -57,7 +38,10 @@ function handleSendMessage() {
   const messageText = elements.messageInput.value.trim();
   if (!messageText || !active_chat || !id) return;
 
-  const chat = chats.find((c) => c.chatTopic === active_chat);
+  let chat = chats.find((c) => c.chatTopic === active_chat);
+
+  if (active_chat.split("/")[0] === "group")
+    chat = groups.find((c) => c.chatTopic === active_chat);
   if (!chat) return;
 
   const newMessage = {
@@ -77,9 +61,50 @@ function handleSendMessage() {
   renderChats();
 }
 
+function handleCreateGroup() {
+  let code = generateGroupCode();
+
+  while (groups_taken?.[code]) {
+    code = generateGroupCode();
+  }
+
+  const status = new Paho.MQTT.Message(
+    JSON.stringify({
+      type: "group-taken",
+      code,
+      admin: id,
+      members: [id],
+    })
+  );
+  status.destinationName = "GROUPS";
+  status.qos = 2;
+  client.send(status);
+
+  const chatTopic = `group/${code}`;
+
+  groups.push({
+    members: [id],
+    chatTopic,
+    code,
+    type: "group",
+  });
+
+  setGroupLinks(groups);
+
+  client.subscribe(chatTopic, { qos: 2 });
+
+  hideModal();
+  showToast(
+    `🟢 Grupo ${code}`,
+    `iniciado no tópico ${chatTopic}`,
+    "success"
+  );
+  renderChats();
+}
+
 function handleNewChat(type) {
   const nameInput =
-    type === "contact" ? elements.contactName : elements.groupName;
+    type === "contact" ? elements.contactName : elements.groupCode;
   const name = nameInput.value.trim();
 
   if (!name) {
@@ -98,6 +123,8 @@ function handleNewChat(type) {
     }
 
     createChat(name);
+  } else {
+    joinGroup(name);
   }
 
   nameInput.value = "";
@@ -113,4 +140,16 @@ function handleNewChat(type) {
     `${actionText} "${name}" enviada`,
     "success"
   );
+}
+
+function generateGroupCode() {
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "";
+
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    code += characters[randomIndex];
+  }
+
+  return code;
 }

@@ -1,9 +1,14 @@
 let client = undefined;
 let id = undefined;
 let chats = [];
+let groups = [];
 let history = {};
 let active_chat = undefined;
 let chatReq = undefined;
+let groupTopic = undefined;
+
+let users_status = {};
+let groups_taken = {};
 
 function createClient(name) {
   id = name;
@@ -23,17 +28,25 @@ function createClient(name) {
   client.onMessageArrived = messageHandler;
 
   chats = getChatLinks(id);
+  groups = getGroupLinks(id);
   history = getChatHistory(id);
+  groups_taken = getGroupsTaken();
   renderChats();
   setUserData(id);
 
   client.connect({
+    onFailure: () => {
+      handleDisconnect();
+    },
     onSuccess: () => {
       updateConnectionStatus();
       showToast("Conectado!", `Bem-vindo, ${id}!`, "success");
 
       client.subscribe(userTopic, { qos: 2 });
-      client.subscribe("usersStatus", { qos: 2 });
+      client.subscribe("usersStatus", { qos: 0 });
+      client.subscribe("GROUPS", { qos: 2 });
+
+      handleConnect();
 
       statusInterval = setInterval(() => {
         const status = new Paho.MQTT.Message(
@@ -73,7 +86,7 @@ function createChat(targetId) {
     return;
   }
 
-  if (pendingInvites[targetId]) {
+  if (pending[targetId]) {
     showToast("Chat", `📤 Convite já enviado para ${targetId}`, "warning");
     return;
   }
@@ -92,11 +105,53 @@ function createChat(targetId) {
 
   showToast("Chat", `📤 Convite enviado para ${targetId}`, "success");
 
-  pendingInvites[targetId] = setTimeout(() => {
+  pending[targetId] = setTimeout(() => {
     showToast("Chat", `⌛ Convite para ${targetId} expirou`, "error");
 
-    clearTimeout(pendingInvites[targetId]);
-    delete pendingInvites[targetId];
+    clearTimeout(pending[targetId]);
+    delete pending[targetId];
+  }, 60000);
+}
+
+function joinGroup(targetId) {
+  targetId = targetId.toUpperCase();
+  const existingChat = groups.find((c) => c.code === targetId);
+
+  if (existingChat) {
+    client.subscribe(existingChat.chatTopic, { qos: 2 });
+    showToast(`🟢 Chat aceito!`, `Tópico ${existingChat.topic}`, "success");
+    renderChats();
+    return;
+  }
+
+  if (pending[`group/${targetId}`]) {
+    showToast("Grupo", `📤 Solicitação já enviada para ${targetId}`, "warning");
+    return;
+  }
+
+  if (!groups_taken?.[targetId]?.admin)
+    showToast("Grupo", `Grupo não encontrado`, "error");
+
+  const request = new Paho.MQTT.Message(
+    JSON.stringify({
+      type: "request",
+      from: id,
+      about: `group/${targetId}`,
+      to: groups_taken[targetId].admin,
+      timestamp: new Date().getTime(),
+    })
+  );
+  request.destinationName = "clientId_" + groups_taken[targetId].admin;
+  request.qos = 2;
+  client.send(request);
+
+  showToast("Grupo", `📤 Solicitação enviada para ${targetId}`, "success");
+
+  pending[`group/${targetId}`] = setTimeout(() => {
+    showToast("Grupo", `⌛ Solicitação para ${targetId} expirou`, "error");
+
+    clearTimeout(pending[`group/${targetId}`]);
+    delete pending[`group/${targetId}`];
   }, 60000);
 }
 
@@ -109,5 +164,5 @@ window.addEventListener("load", () => {
   }
 
   elements.username.value = id;
-  handleConnect();
+  createClient(id);
 });

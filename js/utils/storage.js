@@ -1,16 +1,43 @@
 const setChatLinks = (data) => {
-  localStorage.setItem(`@links:${id}`, JSON.stringify(data));
+  localStorage.setItem(`@chat-links:${id}`, JSON.stringify(data));
 };
 
 const getChatLinks = (id) => {
-  const existingData = localStorage.getItem(`@links:${id}`);
+  const existingData = localStorage.getItem(`@chat-links:${id}`);
   if (existingData) {
     const parsed = JSON.parse(existingData);
-    parsed.forEach((i) => delete i.status);
     return parsed;
   }
 
   return [];
+};
+
+const setGroupLinks = (data) => {
+  localStorage.setItem(`@group-links:${id}`, JSON.stringify(data));
+};
+
+const getGroupLinks = (id) => {
+  const existingData = localStorage.getItem(`@group-links:${id}`);
+  if (existingData) {
+    const parsed = JSON.parse(existingData);
+    return parsed;
+  }
+
+  return [];
+};
+
+const setGroupsTaken = (data) => {
+  localStorage.setItem(`@group-taken`, JSON.stringify(data));
+};
+
+const getGroupsTaken = () => {
+  const existingData = localStorage.getItem(`@group-taken`);
+  if (existingData) {
+    const parsed = JSON.parse(existingData);
+    return parsed;
+  }
+
+  return {};
 };
 
 const setChatHistory = (data) => {

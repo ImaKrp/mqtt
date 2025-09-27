@@ -17,8 +17,9 @@ const elements = {
   sendBtn: document.getElementById("send-btn"),
   newChatModal: document.getElementById("new-chat-modal"),
   acceptChatModal: document.getElementById("accept-chat-modal"),
+  acceptGroupModal: document.getElementById("accept-group-modal"),
   contactName: document.getElementById("contact-name"),
-  groupName: document.getElementById("group-name"),
+  groupCode: document.getElementById("group-name"),
   toastContainer: document.getElementById("toast-container"),
 };
 
@@ -27,7 +28,16 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function setupEventListeners() {
-  elements.connectBtn.addEventListener("click", handleConnect);
+  elements.connectBtn.addEventListener("click", () => {
+    const username = elements.username.value.trim();
+
+    if (!username) {
+      showToast("Erro", "Digite seu nome para conectar", "error");
+      return;
+    }
+
+    createClient(username);
+  });
   elements.disconnectBtn.addEventListener("click", handleDisconnect);
 
   elements.newChatBtn.addEventListener("click", () => showModal());
@@ -49,6 +59,7 @@ function setupModalListeners() {
   const closeBtn = modal.querySelector(".close-btn");
   const addContactBtn = document.getElementById("add-contact-btn");
   const addGroupBtn = document.getElementById("add-group-btn");
+  const createGroup = document.getElementById("create-new-group");
 
   closeBtn.addEventListener("click", hideModal);
   modal.addEventListener("click", (e) => {
@@ -57,11 +68,12 @@ function setupModalListeners() {
 
   addContactBtn.addEventListener("click", () => handleNewChat("contact"));
   addGroupBtn.addEventListener("click", () => handleNewChat("group"));
+  createGroup.addEventListener("click", () => handleCreateGroup());
 
   elements.contactName.addEventListener("keypress", (e) => {
     if (e.key === "Enter") handleNewChat("contact");
   });
-  elements.groupName.addEventListener("keypress", (e) => {
+  elements.groupCode.addEventListener("keypress", (e) => {
     if (e.key === "Enter") handleNewChat("group");
   });
 
@@ -85,8 +97,8 @@ function setupModalListeners() {
 
     client.subscribe(chatTopic, { qos: 2 });
     showToast(
-      `🟢 Chat iniciado com ${chatReq} no tópico ${chatTopic}`,
-      undefined,
+      `🟢 Chat iniciado`,
+      `Com ${chatReq} no tópico ${chatTopic}`,
       "success"
     );
 
@@ -122,6 +134,66 @@ function setupModalListeners() {
 
     hideChatModal();
   });
+
+  const modal3 = elements.acceptGroupModal;
+
+  const closeBtn3 = modal3.querySelector(".close-btn");
+  closeBtn3.addEventListener("click", hideGroupModal);
+  const acceptBtn2 = modal3.querySelector("#acceptChatBtn");
+
+  const declineBtn2 = modal3.querySelector("#declineChatBtn");
+
+  acceptBtn2.addEventListener("click", () => {
+    const code = groupTopic.split("/")[1];
+    showToast(
+      `🟢 Solicitação de ${chatReq} no grupo ${groupTopic} aceita`,
+      undefined,
+      "success"
+    );
+
+    const response = new Paho.MQTT.Message(
+      JSON.stringify({
+        type: "reqResponse",
+        from: id,
+        to: chatReq,
+        topic: groupTopic,
+      })
+    );
+    response.destinationName = "clientId_" + chatReq;
+    response.qos = 2;
+    client.send(response);
+
+    const status = new Paho.MQTT.Message(
+      JSON.stringify({
+        type: "group-taken",
+        code,
+        admin: id,
+        members: [...new Set([...groups_taken?.[code]?.members, chatReq])],
+      })
+    );
+    status.destinationName = "GROUPS";
+    status.qos = 2;
+    client.send(status);
+
+    hideGroupModal();
+  });
+  declineBtn2.addEventListener("click", () => {
+    showToast(`❌ Convite recusado de ${chatReq}`, undefined, "error");
+
+    const response = new Paho.MQTT.Message(
+      JSON.stringify({
+        type: "reqResponse",
+        from: id,
+        to: chatReq,
+        topic: undefined,
+      })
+    );
+    response.destinationName = "clientId_" + chatReq;
+    response.qos = 2;
+    client.send(response);
+
+    hideGroupModal();
+  });
 }
 
 function showChatModal(req) {
@@ -138,9 +210,34 @@ function hideChatModal() {
   clearTimeout(chatModalTimeout);
 }
 
+function showGroupModal(req, group) {
+  elements.acceptGroupModal.classList.add("show");
+  chatReq = req;
+  groupTopic = group;
+  const texts = elements.acceptGroupModal.querySelectorAll("strong");
+
+  texts[0].textContent = req;
+  texts[1].textContent = group.split("/")[1];
+
+  groupModalTimeout = setTimeout(() => hideChatModal(), 60000);
+}
+
+function hideGroupModal() {
+  chatReq = undefined;
+  groupTopic = undefined;
+  elements.acceptGroupModal.classList.remove("show");
+  clearTimeout(groupModalTimeout);
+}
+
 elements.username.addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
-    handleConnect();
+    const username = elements.username.value.trim();
+    if (!username) {
+      showToast("Erro", "Digite seu nome para conectar", "error");
+      return;
+    }
+
+    createClient(username);
   }
 });
 
@@ -183,14 +280,11 @@ function updateConnectionStatus() {
 }
 
 function renderChats() {
-  const contacts = chats.filter((chat) => chat.type === "chat");
-  const groups = chats.filter((chat) => chat.type === "group");
-
-  elements.contactsList.innerHTML = contacts
+  elements.contactsList.innerHTML = chats
     .map((chat) => createChatItem(chat))
     .join("");
   elements.groupsList.innerHTML = groups
-    .map((chat) => createChatItem(chat))
+    .map((chat) => createGroupChatItem(chat))
     .join("");
 
   document.querySelectorAll(".chat-item").forEach((item) => {
@@ -201,16 +295,37 @@ function renderChats() {
   });
 }
 
+function createGroupChatItem(chat) {
+  const isActive = active_chat === chat.chatTopic;
+
+  return `
+        <div class="chat-item ${isActive ? "active" : ""}" data-chat-id="${
+    chat.chatTopic
+  }">
+            <div class="chat-avatar group">
+                
+                 '<i class="fa-solid fa-users"></i>'
+                  
+              
+            </div>
+            <div class="chat-info">
+                <h4>${chat.code}</h4>
+                <p>${chat.lastMessage || ""}</p>
+            </div>
+        </div>
+    `;
+}
+
 function createChatItem(chat) {
   const isActive = active_chat === chat.chatTopic;
   const onlineIndicator =
     chat.type === "chat" ? '<div class="online-indicator"></div>' : "";
 
   const user = chat.members.filter((i) => i !== id)[0];
-  const updates = chat?.status?.[user];
+  const updated_at = users_status?.[user];
   let isOnline = false;
 
-  if (updates && new Date().getTime() - updates?.last_update < 6000) {
+  if (updated_at && new Date().getTime() - updated_at < 6000) {
     isOnline = true;
   }
 
@@ -252,8 +367,15 @@ function selectChat(chatId) {
     showToast("Erro", "Conecte-se primeiro para acessar os chats", "error");
     return;
   }
+
   active_chat = chatId;
-  const chat = chats.find((c) => c.chatTopic === chatId);
+
+  let chat = chats.find((c) => c.chatTopic === chatId);
+
+  if (chatId.split("/")[0] === "group")
+    chat = groups.find((c) => c.chatTopic === chatId);
+
+  console.log(chatId);
 
   if (chat) {
     showChatArea(chat);
@@ -268,17 +390,21 @@ function showChatArea(chat) {
   document.querySelector(".main-content .message-input-area").style.display =
     "block";
 
-  elements.chatName.textContent = chat.members.filter((i) => i !== id)[0];
-  elements.chatType.textContent = chat.type === "group" ? "Grupo" : "Offline";
-  elements.chatAvatarText.textContent =
+  elements.chatName.textContent =
+    chat.type === "group" ? chat.code : chat.members.filter((i) => i !== id)[0];
+  elements.chatType.textContent =
     chat.type === "group"
-      ? '<i class="fa-solid fa-users"></i>'
-      : chat.members
-          .filter((i) => i !== id)[0]
-          .charAt(0)
-          .toUpperCase();
+      ? groups_taken[chat.chatTopic.split("/")[1]].members.join(", ")
+      : "Offline";
+  if (chat.type === "group")
+    elements.chatAvatarText.innerHTML = '<i class="fa-solid fa-users"></i>';
+  else
+    elements.chatAvatarText.textContent = chat.members
+      .filter((i) => i !== id)[0]
+      .charAt(0)
+      .toUpperCase();
 
-  if (history[active_chat]) renderMessages(history[active_chat]);
+  renderMessages(history[active_chat]);
 }
 
 function showWelcomeScreen() {
@@ -295,22 +421,29 @@ document
   .addEventListener("click", showWelcomeScreen);
 
 function renderMessages(htry) {
+  if (!htry?.msgs) elements.messagesContainer.innerHTML = "";
   const messages = htry.msgs;
 
-  if (!messages) return;
+  const isGroup = active_chat.split("/")[0] === "group";
+
   elements.messagesContainer.innerHTML = messages
-    .map((message) => createMessageBubble(message))
+    .map((message) => createMessageBubble(message, isGroup))
     .join("");
   document.querySelector(".chat-area").scrollTop =
     document.querySelector(".chat-area").scrollHeight;
 }
 
-function createMessageBubble(message) {
+function createMessageBubble(message, isGroup = false) {
   const time = formatTime(message.timestamp);
 
   return `
         <div class="message ${message.from === id ? "sent" : "received"}">
             <div class="message-bubble">
+              ${
+                isGroup && message.from !== id
+                  ? `<div class="message-author">${message.from}</div>`
+                  : ""
+              }
                 <div class="message-text">${message.message}</div>
                 <div class="message-time">${time}</div>
             </div>

@@ -439,6 +439,11 @@ body {
   margin-bottom: 0.25rem;
 }
 
+.message-author {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
 .message-time {
   font-size: 0.75rem;
   opacity: 0.7;
@@ -754,4 +759,15 @@ body {
     box-shadow: 0px 0px 8px -1px rgba(0, 0, 0, 0.203);
     left: 0px;
   }
+}
+
+#create-new-group {
+  background-color: transparent;
+  border: 0;
+  outline: 0;
+  text-decoration: underline;
+  color: #3b82f6;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.875rem;
 }

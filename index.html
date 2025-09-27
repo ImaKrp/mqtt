@@ -30,7 +30,9 @@
             <span class="icon"><i class="fa-solid fa-comment"></i></span>
             <h1>MQTT App</h1>
 
-            <button class="sidebar-close-btn"><i class="fa-solid fa-xmark"></i></button>
+            <button class="sidebar-close-btn">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
           </div>
         </div>
 
@@ -158,6 +160,28 @@
         </div>
       </div>
     </div>
+    <div id="accept-group-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2><i class="fa-solid fa-comment"></i> Solicitação de participação</h2>
+          <button class="close-btn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <p>
+            O usuário <strong>[Nome do Usuário]</strong> gostaria de participar do grupo 
+             <strong>[Nome do Grupo]</strong>.
+          </p>
+          <div class="modal-actions">
+            <button id="declineChatBtn" class="btn btn-secondary">
+              <i class="fa-solid fa-xmark"></i> Recusar
+            </button>
+            <button id="acceptChatBtn" class="btn btn-primary">
+              <i class="fa-solid fa-check"></i> Aceitar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div id="new-chat-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -199,15 +223,18 @@
 
           <div id="group-tab" class="tab-content">
             <div class="form-group">
-              <label for="group-name">Nome do grupo:</label>
+              <label for="group-name">Código do grupo:</label>
               <input
                 type="text"
                 id="group-name"
-                placeholder="Digite o nome do grupo"
+                placeholder="Digite o código do grupo"
               />
             </div>
             <div class="info-box">
-              <p>Uma solicitação para participar deste grupo será enviada.</p>
+              <p>
+                Uma solicitação para participar deste grupo será enviada ou crie
+                um novo grupo <button id="create-new-group">aqui</button>.
+              </p>
             </div>
             <button id="add-group-btn" class="btn btn-primary full-width">
               <i class="fa-solid fa-users"></i> Solicitar Participação
