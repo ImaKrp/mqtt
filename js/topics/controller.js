@@ -87,7 +87,18 @@ function handleNewChat(type) {
     return;
   }
 
-  if (type === "contact") createChat(name);
+  if (type === "contact") {
+    if (name === id) {
+      showToast(
+        `Erro`,
+        `Você não pode enviar um convite para você mesmo`,
+        "error"
+      );
+      return;
+    }
+
+    createChat(name);
+  }
 
   nameInput.value = "";
   hideModal();

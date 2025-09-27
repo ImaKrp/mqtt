@@ -148,10 +148,18 @@ document
   .getElementById("open-sidebar")
   .addEventListener("click", toggleSidebar);
 document
-  .querySelector(".sidebar .close-btn")
-  .addEventListener("click", toggleSidebar);
+  .querySelector(".sidebar-close-btn")
+  .addEventListener("click", (e) => toggleSidebar(e));
 
-function toggleSidebar() {
+document.querySelector("body").addEventListener("click", (e) => {
+  if (!document.querySelector(".sidebar").classList.contains("open")) return;
+  if (!document.querySelector(".sidebar").contains(e.target)) {
+    document.querySelector(".sidebar").classList.remove("open");
+  }
+});
+
+function toggleSidebar(e) {
+  if (e) e.stopImmediatePropagation();
   document.querySelector(".sidebar").classList.toggle("open");
 }
 
@@ -274,6 +282,7 @@ function showChatArea(chat) {
 }
 
 function showWelcomeScreen() {
+  toggleSidebar();
   elements.welcomeScreen.style.display = "flex";
   elements.activeChat.style.display = "none";
   document.querySelector(".main-content .chat-info").style.display = "none";
@@ -315,7 +324,6 @@ function formatTime(date) {
     minute: "2-digit",
   });
 }
-
 
 function showModal() {
   elements.newChatModal.classList.add("show");

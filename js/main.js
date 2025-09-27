@@ -44,7 +44,7 @@ function createClient(name) {
           })
         );
         status.destinationName = "usersStatus";
-        status.qos = 2;
+        status.qos = 0;
         client.send(status);
       }, 5000);
     },
@@ -53,11 +53,22 @@ function createClient(name) {
 }
 
 function createChat(targetId) {
-  const existingChat = chats.find((c) => c.members.includes(targetId));
+  if (targetId === id) {
+    showToast(
+      `Erro`,
+      `Você não pode enviar um convite para você mesmo`,
+      "error"
+    );
+    return;
+  }
+
+  const existingChat = chats.find(
+    (c) => c.type === "chat" && c.members.includes(targetId)
+  );
 
   if (existingChat) {
     client.subscribe(existingChat.chatTopic, { qos: 2 });
-    showToast(`🟢 Chat aceito!`, `Tópico ${data.topic}`, "success");
+    showToast(`🟢 Chat aceito!`, `Tópico ${existingChat.topic}`, "success");
     renderChats();
     return;
   }
