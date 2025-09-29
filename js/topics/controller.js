@@ -78,6 +78,7 @@ function handleCreateGroup() {
   );
   status.destinationName = "GROUPS";
   status.qos = 2;
+  status.retained = true;
   client.send(status);
 
   const chatTopic = `group/${code}`;
@@ -94,11 +95,7 @@ function handleCreateGroup() {
   client.subscribe(chatTopic, { qos: 2 });
 
   hideModal();
-  showToast(
-    `🟢 Grupo ${code}`,
-    `iniciado no tópico ${chatTopic}`,
-    "success"
-  );
+  showToast(`🟢 Grupo ${code}`, `iniciado no tópico ${chatTopic}`, "success");
   renderChats();
 }
 

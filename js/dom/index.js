@@ -173,6 +173,7 @@ function setupModalListeners() {
     );
     status.destinationName = "GROUPS";
     status.qos = 2;
+    status.retained = true;
     client.send(status);
 
     hideGroupModal();

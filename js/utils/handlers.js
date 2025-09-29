@@ -18,6 +18,10 @@ function messageHandler(message) {
     groups_taken[data.code] = { ...data };
 
     setGroupsTaken(groups_taken);
+
+    const chatId = `group/${data.code}`;
+    if (chatId === active_chat)
+      showChatArea(groups.find((c) => c.chatTopic === chatId));
   }
 
   if (data.type === "invite" && data.to === id) {
