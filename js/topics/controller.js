@@ -21,9 +21,18 @@ function handleConnect() {
 }
 
 function handleDisconnect() {
+  client = undefined;
   id = undefined;
-  active_chat = undefined;
   chats = [];
+  groups = [];
+  history = {};
+  active_chat = undefined;
+  chatReq = undefined;
+  groupTopic = undefined;
+
+  users_status = {};
+  groups_taken = {};
+
   renderChats();
   if (client.isConnected()) client.disconnect();
   updateConnectionStatus();
