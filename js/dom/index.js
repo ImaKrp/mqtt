@@ -437,6 +437,8 @@ function renderMessages(htry) {
 function createMessageBubble(message, isGroup = false) {
   const time = formatTime(message.timestamp);
 
+  console.log(message);
+
   return `
         <div class="message ${message.from === id ? "sent" : "received"}">
             <div class="message-bubble">
@@ -445,7 +447,9 @@ function createMessageBubble(message, isGroup = false) {
                   ? `<div class="message-author">${message.from}</div>`
                   : ""
               }
-                <div class="message-text">${message.message}</div>
+                <div class="message-text">${
+                  message.msg_type === "img" && `<img src="${message.data}"/>`
+                }${message.message ? message.message : ''}</div>
                 <div class="message-time">${time}</div>
             </div>
         </div>
@@ -505,3 +509,35 @@ elements.messageInput.addEventListener("input", () => {
 });
 
 elements.sendBtn.disabled = true;
+
+document.getElementById("img-input").addEventListener("change", (event) => {
+  const files = event.target.files; // FileList
+  if (files.length > 0) {
+    console.log("Arquivo selecionado:", files[0].name);
+
+    if (!files[0]) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      const base64 = e.target.result;
+      event.target.value = "";
+
+      const newMessage = {
+        type: "message",
+        from: id,
+        msg_type: "img",
+        timestamp: new Date().getTime(),
+        data: base64,
+      };
+
+      const msg = new Paho.MQTT.Message(JSON.stringify(newMessage));
+      msg.destinationName = active_chat;
+      msg.qos = 2;
+      msg.retained = true;
+      client.send(msg);
+    };
+
+    reader.readAsDataURL(files[0]);
+  }
+});

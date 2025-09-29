@@ -8,6 +8,7 @@
       src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"
       type="text/javascript"
     ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 
     <link rel="stylesheet" href="style.css" />
     <script src="./js/main.js" defer></script>
@@ -16,6 +17,7 @@
     <script src="./js/utils/storage.js" defer></script>
     <script src="./js/topics/chat.js" defer></script>
     <script src="./js/topics/controller.js" defer></script>
+    <script src="./js/crypt/b64.js" defer></script>
 
     <script
       src="https://kit.fontawesome.com/7d89d2f34b.js"
@@ -126,6 +128,18 @@
 
         <div class="message-input-area" style="display: none">
           <div class="input-container">
+            <form action="/search" method="GET">
+              <label for="img-input" class="send-btn">
+                <i class="fa-solid fa-image"></i>
+              </label>
+              <input
+                style="display: none"
+                type="file"
+                id="img-input"
+                accept="image/*"
+              />
+            </form>
+
             <input
               type="text"
               id="message-input"
@@ -163,13 +177,15 @@
     <div id="accept-group-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
-          <h2><i class="fa-solid fa-comment"></i> Solicitação de participação</h2>
+          <h2>
+            <i class="fa-solid fa-comment"></i> Solicitação de participação
+          </h2>
           <button class="close-btn"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="modal-body">
           <p>
-            O usuário <strong>[Nome do Usuário]</strong> gostaria de participar do grupo 
-             <strong>[Nome do Grupo]</strong>.
+            O usuário <strong>[Nome do Usuário]</strong> gostaria de participar
+            do grupo <strong>[Nome do Grupo]</strong>.
           </p>
           <div class="modal-actions">
             <button id="declineChatBtn" class="btn btn-secondary">

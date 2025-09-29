@@ -5,7 +5,6 @@ let groupModalTimeout = undefined;
 function onlineStatus(data) {
   users_status[data.from] = data.timestamp;
 
-  setChatLinks(chats);
   renderChats();
 }
 
@@ -34,7 +33,22 @@ function handleDisconnect() {
   groups_taken = {};
 
   renderChats();
-  if (client.isConnected()) client.disconnect();
+  if (client.isConnected()) {
+    if (statusInterval) clearInterval(statusInterval);
+
+    const status = new Paho.MQTT.Message(
+      JSON.stringify({
+        type: "status",
+        from: id,
+        timestamp: 0,
+      })
+    );
+    status.destinationName = "usersStatus";
+    status.qos = 2;
+    client.send(status);
+
+    client.disconnect();
+  }
   updateConnectionStatus();
   showWelcomeScreen();
   elements.username.disabled = false;

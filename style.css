@@ -187,6 +187,7 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  width: 100vw;
 }
 
 /* Header */
@@ -387,19 +388,31 @@ body {
 .messages-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  /* gap: 1rem; */
   flex-grow: 1;
 }
 .message {
   display: flex;
+
+  img {
+    max-width: 200px;
+    border-radius: 0.375rem;
+  }
 }
 
 .message.sent {
   justify-content: flex-end;
+  margin-top: 1rem;
 }
 
 .message.received {
   justify-content: flex-start;
+  margin-top: 1rem;
+}
+
+.message.received + .message.received,
+.message.sent + .message.sent {
+  margin-top: 0.4rem;
 }
 
 .message-bubble {
@@ -506,6 +519,7 @@ body {
   align-items: center;
   justify-content: center;
   position: relative;
+  transition: background 0.3s ease-in-out;
 
   > i {
     position: absolute;

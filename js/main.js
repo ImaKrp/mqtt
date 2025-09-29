@@ -10,16 +10,18 @@ let groupTopic = undefined;
 let users_status = {};
 let groups_taken = {};
 
+let statusInterval = undefined;
+
 function createClient(name) {
   id = name;
   const userTopic = "clientId_" + name;
-
-  let statusInterval = undefined;
 
   client = new Paho.MQTT.Client("localhost", 9001, userTopic);
 
   client.onConnectionLost = (res) => {
     if (statusInterval) clearInterval(statusInterval);
+
+    console.log(res.errorMessage);
     if (res.errorCode !== 0) {
       showToast("❌ Conexão perdida", res.errorMessage, "error");
     }
@@ -59,7 +61,7 @@ function createClient(name) {
         status.destinationName = "usersStatus";
         status.qos = 0;
         client.send(status);
-      }, 5000);
+      }, 2500);
     },
     cleanSession: false,
   });
@@ -91,6 +93,8 @@ function createChat(targetId) {
     return;
   }
 
+  if (!users_status?.[targetId])
+    showToast("Chat", `Contato não encontrado`, "error");
   const invite = new Paho.MQTT.Message(
     JSON.stringify({
       type: "invite",
