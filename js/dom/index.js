@@ -448,7 +448,7 @@ function createMessageBubble(message, isGroup = false) {
                   : ""
               }
                 <div class="message-text">${
-                  message.msg_type === "img" && `<img src="${message.data}"/>`
+                  message.msg_type === "img" ? `<img src="${message.data}"/>` :''
                 }${message.message ? message.message : ''}</div>
                 <div class="message-time">${time}</div>
             </div>
