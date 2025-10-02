@@ -430,20 +430,27 @@ function renderMessages(htry) {
 
   const isGroup = active_chat.split("/")[0] === "group";
 
-  elements.messagesContainer.innerHTML = messages
-    .map((message) => createMessageBubble(message, isGroup))
-    .join("");
+  const mapped = messages.map((message, i) =>
+    createMessageBubble(message, isGroup, i, i > 0 && messages[i - 1])
+  );
+
+  elements.messagesContainer.innerHTML = mapped.join("");
   document.querySelector(".chat-area").scrollTop =
     document.querySelector(".chat-area").scrollHeight;
 }
 
-function createMessageBubble(message, isGroup = false) {
+function createMessageBubble(message, isGroup = false, i, prev) {
   const time = formatTime(message.timestamp);
+  let margin = "";
 
-  console.log(message);
+  if (prev && prev.from !== message.from) {
+    margin = "margin-top: 1.5rem";
+  }
 
   return `
-        <div class="message ${message.from === id ? "sent" : "received"}">
+        <div class="message ${
+          message.from === id ? "sent" : "received"
+        }" style="${i === 0 ? "margin-top: 0;" : margin}">
             <div class="message-bubble">
               ${
                 isGroup && message.from !== id
