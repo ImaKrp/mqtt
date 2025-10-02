@@ -443,7 +443,7 @@ function createMessageBubble(message, isGroup = false, i, prev) {
   const time = formatTime(message.timestamp);
   let margin = "";
 
-  if (prev && prev.from !== message.from) {
+  if (isGroup && prev && prev.from !== message.from) {
     margin = "margin-top: 1.5rem";
   }
 
