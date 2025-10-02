@@ -422,7 +422,10 @@ document
   .addEventListener("click", showWelcomeScreen);
 
 function renderMessages(htry) {
-  if (!htry?.msgs) elements.messagesContainer.innerHTML = "";
+  if (!htry?.msgs) {
+    elements.messagesContainer.innerHTML = "";
+    return;
+  }
   const messages = htry.msgs;
 
   const isGroup = active_chat.split("/")[0] === "group";
@@ -448,8 +451,10 @@ function createMessageBubble(message, isGroup = false) {
                   : ""
               }
                 <div class="message-text">${
-                  message.msg_type === "img" ? `<img src="${message.data}"/>` :''
-                }${message.message ? message.message : ''}</div>
+                  message.msg_type === "img"
+                    ? `<img src="${message.data}"/>`
+                    : ""
+                }${message.message ? message.message : ""}</div>
                 <div class="message-time">${time}</div>
             </div>
         </div>
