@@ -20,7 +20,6 @@ function handleConnect() {
 }
 
 function handleDisconnect() {
-  client = undefined;
   id = undefined;
   chats = [];
   groups = [];
@@ -33,6 +32,7 @@ function handleDisconnect() {
   groups_taken = {};
 
   renderChats();
+
   if (client.isConnected()) {
     if (statusInterval) clearInterval(statusInterval);
 
@@ -48,6 +48,8 @@ function handleDisconnect() {
     client.send(status);
 
     client.disconnect();
+
+    client = undefined;
   }
   updateConnectionStatus();
   showWelcomeScreen();
